@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for ("static", filename="css/general.css") }}">
+    <link rel="stylesheet" href="{{ url_for ("static", filename="css/classical.css") }}">
+    {% if theme == 'light' %}
+        <link rel="stylesheet" href="{{ url_for ('static', filename='css/light-theme.css') }}">
+    {% else %}
+        <link rel="stylesheet" href="{{ url_for ('static', filename='css/dark-theme.css') }}">
+    {% endif %}
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for ('static', filename='favicon_io/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for ('static', filename='favicon_io/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for ('static', filename='favicon_io/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for ('static', filename='favicon_io/site.webmanifest') }}">
+
+    <script src="/static/js/main.js"></script> <!-- Підключення зовнішнього файлу -->
+
+    <title>{% block title %}NZ AI Org{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <div class = "navbar_1">
+            <h3>Nezer Hill AI</h3>
+            <div class = "navbar_2">
+                <a href = "#" class = "batonai">Choose AI</a>
+                <div class="drop1">
+                    <button type="button" class="btn btn-secondary burger" onclick="toggleMenu()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"></path>
+                        </svg>
+                    </button>
+                    <div class = "baton1">
+                        <a href = "/">Home</a>
+                        <a href = "/about">About us</a>
+                        <a href = "/privacy">Privacy Policy</a>
+                        <a href = "/acount">Account</a>
+                        <a class = "btn_list" href = "#" style = "display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 17 17">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class = "drop2">
+                    <div class = "baton2">
+                        <a href = "/">Home</a>
+                        <a class = "batonai" href = "#" style = "margin-inline: 2px;">Choose AI</a> <a class = "btn_account" href = "/acount">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 17 17">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/> <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class = "drop3">
+                    <div class = "baton3">
+                        <a href = "/">Classic 0.1</a>
+                        <a href = "#">Pro AI</a>
+                    </div>
+                </div>
+            </div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+<!-- Flash повідомлення -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+</body>
+</html>
