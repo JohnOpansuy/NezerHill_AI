@@ -14,9 +14,9 @@ import html
 import os
 
 #Налаштування веб-сайту та його конфігурацій.
-current_time = datetime.now()  # Отримати поточний час
-time = current_time.strftime ("%H:%M:%S")  # Формат часу
-date = current_time.strftime ("%Y-%m-%d")  # Формат дати
+#?current_time = datetime.now()  # Отримати поточний час
+#?time = current_time.strftime ("%H:%M:%S")  # Формат часу
+#?date = current_time.strftime ("%Y-%m-%d")  # Формат дати
 website = Flask (__name__)
 website.config ["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog.db"
 website.config ["SQLALCHMEY_TRACK_MODIFICATIONS"] = False
@@ -56,6 +56,9 @@ class Users (UserMixin, basa.Model):
     user_name = basa.Column (basa.String (50), nullable = False) #! Не юзати бо помилка сервнра тоді (, unique = True).
     user_mail = basa.Column (basa.String (80), unique = True, nullable = False)
     user_password = basa.Column (basa.String (100), nullable = False)
+    user_data = basa.Column (basa.String (50), nullable = False)
+    last_seen = basa.Column (basa.String (50), nullable = True)
+    user_status = basa.Column (basa.String (80), nullable = False, default = "User")
 #Дані для безпеки.
     user_tryes = basa.Column (basa.Integer, default = 3)
     user_ip = basa.Column (basa.String (75))
@@ -94,21 +97,30 @@ def User_sing():
             return redirect (url_for ("User_sing"))
 #Трай додавання нового користувача.
         try:
-# Збір IP-адреси та інформації про браузер.
-            ip_address = request.remote_addr
-            browser_info = request.headers.get ("User-Agent")
-            hashed_password = generate_password_hash (password, method = "pbkdf2:sha256")
-            new_user = Users (user_name = name, user_mail = email, user_password = hashed_password, user_ip = ip_address, user_browser = browser_info)
+            ip_address = request.headers.get ('X-Forwarded-For', request.remote_addr)
+            browser_info = request.headers.get ("User-Agent", "Unknown")
+            current_time = datetime.now()
+            formatted_time = current_time.strftime ("%Y-%m-%d %H:%M:%S")  # Формат без мілісекунд
+            date = current_time.strftime ("%Y-%m-%d")
+            hashed_password = generate_password_hash (password, method="pbkdf2:sha256")
+            new_user = Users(
+                user_name = name,
+                user_mail = email,
+                user_password = hashed_password,
+                user_ip = ip_address,
+                user_browser = browser_info,
+                user_data = date,
+            )
             basa.session.add (new_user)
             basa.session.commit()
             login_user (new_user)
             flash ("You are registered.", "success")
-            logging.info (f"User registered successfull: {name} - {email}.\n->IP [{ip_address}].")
+            logging.info (f"User registered successfully: {name} - {email}.\n-> IP: {ip_address}")
             return redirect (url_for ("Main_page"))
         except Exception as err:
             basa.session.rollback()
-            flash (f"Error in register work. Try later.", "danger")
-            logging.error (f"Error when register new user - {err}.")
+            flash ("Error in registration process. Try again later.", "danger")
+            logging.error (f"Error when registering new user: {err}.")
             return redirect (url_for ("User_sing"))
     return render_template ("sing.html", form = form)
 #Деф логіну користувача.
@@ -135,10 +147,12 @@ def User_login():
 #Перевірка паролю.
         if check_password_hash (user.user_password, password):
             login_user (user)
-            user.user_tryes = 3
-            basa.session.commit()
-            flash ("You successfull enter!", "success")
-            logging.info (f"User enter succes now - {email}")
+            current_time = datetime.now()  # Отримати поточний час.
+            user.last_seen = current_time.strftime ("%Y-%m-%d %H:%M:%S")  # Формат дати та часу.
+            user.user_tryes = 3  # Відновлення кількості спроб.
+            basa.session.commit()  # Збереження змін у базу даних.
+            flash ("You successfully logged in!", "success")
+            logging.info (f"User successfully logged in - {email} at {user.last_seen}")
             return redirect (url_for ("Main_page"))
         else:
             user.user_tryes -= 1  # Зменшення спроб
@@ -176,40 +190,60 @@ def About_page():
 def Privacy_page():
     return render_template ("privacy.html")
 #Деф сторінки акаунту.
-@website.route ("/acount", methods = ["GET", "POST"])
+@website.route("/acount", methods=["GET", "POST"])
 @login_required
 def Account_page():
-#Створення екземпляра форми для редагування акаунту.
+    # Створення екземпляра форми для редагування акаунту
     form = EditAcountForm()
-#Іф форма валідна після відправки.
+
+    # Обробка даних після відправки форми
     if form.validate_on_submit():
         name = form.name.data
         email = form.email.data
         password = form.password.data
-#Перевірка чи існує email в базі і чи він не належить поточному користувачу.
-        check_email = Users.query.filter (Users.user_mail == email, Users.id != current_user.id).first()
-        if check_email:
-            logging.error (f"Спроба оновлення з існуючим email - {email}.")
-            flash ("Цей email вже використовується. Спробуйте інший.", "warning")
-            return redirect (url_for ("Account_page"))
-#Оновлення даних поточного користувача.
+
+        # Перевірка чи email вже існує в базі і не належить поточному користувачу
+        existing_user = Users.query.filter(
+            Users.user_mail == email, Users.id != current_user.id
+        ).first()
+
+        if existing_user:
+            logging.error(f"New email already exists - {email}.")
+            flash("This email is already in use. Please try another one.", "warning")
+            return redirect(url_for("Account_page"))
+
+        # Оновлення даних користувача
         try:
             current_user.user_name = name
             current_user.user_mail = email
-#Іф пароль введено, оновити його.
+
+            # Перевірка і оновлення паролю (якщо введено)
             if password:
                 current_user.user_password = password
+
+            # Збереження змін у базі даних
             basa.session.commit()
-            flash ("Інформація успішно оновлена.", "success")
-            logging.info (f"Інформація оновлена для користувача - {email}.")
-            return redirect (url_for ("Account_page"))
+            flash("All changes have been successfully saved.", "success")
+            logging.info(f"Account information updated for user - {email}.")
+            return redirect(url_for("account_page"))
+
         except Exception as err:
+            # У випадку помилки виконуємо відкат змін
             basa.session.rollback()
-            flash ("Помилка під час оновлення інформації.", "danger")
-            logging.warning (f"Помилка під час оновлення акаунту {current_user.user_mail} на {email}. Деталі: {err}.")
-            return redirect (url_for ("Account_page"))
-    return render_template ("acount.html", form = form)
-#.
+            flash("An error occurred. Changes were not saved.", "danger")
+            logging.warning(f"Failed to update account {current_user.user_mail}. Details: {err}.")
+            return redirect(url_for("account_page"))
+
+    # Відображення сторінки профілю
+    return render_template(
+        "acount.html",
+        form=form,
+        name=current_user.user_name,
+        mail=current_user.user_mail,
+        data=current_user.user_data,
+        seen=current_user.last_seen,
+        status=current_user.user_status
+    )
 
 #Деф помилки 404-не має та сторінки.
 @website.errorhandler (404)
