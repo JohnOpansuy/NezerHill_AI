@@ -1,0 +1,141 @@
+{% extends "shablon.html" %}
+{% block title %}NZ AI - Home{% endblock %}
+
+{% block content %}
+    <div class="container_1">
+        <div class="text_1">
+            <a>Start a new chat</a>
+            <div>
+                <button title="Add chat" class="btn-create-chat" data-action="open">+</button>
+                <a title="Search chat" class="btn_list" href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                        class="bi bi-search" viewBox="0 0 17 17">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <div id="overlay" class="overlay"></div>
+        <!-- Форма створення нового чату -->
+        <div class="account-container-edit" id="edit_container">
+            <form method="POST" action="/create_chad" onsubmit="return validateForm()">
+                {{ create_form.hidden_tag() }}
+                <button style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 18px; cursor: pointer;"
+                    data-action="close" type="button" id="cancelButton">&times;</button>
+                <div class="chat-name-form">
+                    <p>Create a new name for chat:</p>
+                    {{ create_form.name(size=40, placeholder="name") }}<br>
+                </div>
+                <div class="chat-color-form">
+                    <p>Select a color for chat:</p>
+                    <input class="chat-color" name="chat_color" type="color">
+                </div>
+                {{ create_form.submit(class="btn btn-info") }}
+            </form>
+        </div>
+        <div class="scrollable-container1">
+            {% for chat in chats %}
+  <!-- Контейнер редагування чату (спочатку прихований) -->
+                <div class="account-container-edit" id="edit_chat_container_{{ chat.id }}" style="display:none;">
+                    <form method="POST" action="/edit_chad" onsubmit="return validateForm()">
+                    {{ edit_form.hidden_tag() }}
+                    <button title = "Close edditing" type="button" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 18px; cursor: pointer;"
+                            onclick="closeEditChat({{ chat.id }})">&times;</button>
+                    <!-- Приховане поле з унікальним ID чату -->
+                    <input type="hidden" name="chat_id" value="{{ chat.id }}">
+                    <div class="chat-name-form">
+                        <p>Edit a new name for chat:</p>
+                        {{ edit_form.name(size=40, placeholder="name", value=chat.chat_name) }}<br>
+                    </div>
+                    <div class="chat-color-form">
+                        <p>Select a color for chat:</p>
+                        <input class="chat-color" name="chat_color" type="color" value="{{ chat.chat_color }}">
+                    </div>
+                    {{ edit_form.submit(class="btn btn-info", title = "Save") }}
+                    </form>
+                </div>
+
+                <!-- Відображення інформації про створений чат -->
+                <div class="created_chad_container">
+                    <div class="created_chad_top">
+                    <div>
+                        <a href="#" class="created_chad_name" style="font-size: 14px; font-weight: bold;">
+                        {{ chat.chat_name }}
+                        </a>
+                    </div>
+                    <div>
+                        <!-- Форма видалення -->
+                        <form action="{{ url_for('Main_page') }}" method="POST" style="display: inline;">
+                        {{ create_form.hidden_tag() }}
+                        <input type="hidden" name="name" value="{{ chat.chat_name }}">
+                        <button title = "Close creating" type="submit" class="created_chad_textos" title = "Delete chat">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-x-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
+                        </button>
+                        </form>
+                    </div>
+                    </div>
+                    <div class="created_chad_bottom">
+                    <div>
+                        <p class="created_chad_some">
+                        {{ chat.chat_data.strftime('%d') }} {{ chat.chat_data.strftime('%b')[:2] }}. {{ chat.chat_data.strftime('%Y') }}
+                        </p>
+                    </div>
+                    <div class="created_chad_color" style="background-color: {{ chat.chat_color }};"></div>
+                    <div>
+                        <!-- Кнопка, що відкриває контейнер редагування відповідного чату -->
+                        <a title = "Edit chat" class="created_chad_textos" onclick="openEditChat({{ chat.id }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                        </a>
+                    </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="text_3">
+            <div class="text_3-2">
+                <h5>Time:</h5>
+                <h5>Date:</h5>
+            </div>
+            <div class="text_3-3">
+                <h5><span id="time"></span></h5>
+                <h5><span id="date"></span></h5>
+            </div>
+        </div>
+    </div>
+    <!-- Контейнер чату -->
+    <div class="container_2">
+        <div class="chat_container">
+            <div class="scrollable-container3">
+                <div class="messages user-send-container">
+                    <div class="user-send">
+                        User: Some text from user.
+                    </div>
+                    <h3 class="from-who">You</h3>
+                </div>
+                <div class="messages ai-send-container">
+                    <h3 class="from-who">AI</h3>
+                    <div class="ai-send">
+                        AI: Some answers from AI.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="send_container">
+            <textarea class="send_input" id = "inputField" type="text" placeholder="Send question to NZ AI for ask..."></textarea>
+            <a title = "Send message" class="send-btn" href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                    class="bi bi-send" viewBox="1 -2 18 18" transform="rotate(45 0 0)">
+                    <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+{% endblock %}

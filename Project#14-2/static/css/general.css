@@ -1,0 +1,569 @@
+html, body, main, header, footer {
+    margin: 0;
+    padding: 0;
+}
+html {
+    scroll-behavior: smooth;
+}
+header {
+    z-index: 10;
+}
+
+h3, svg{
+    display: inline;
+}
+li {
+    text-align: left;
+}
+a:hover {
+    cursor: pointer;
+}
+
+.flash-message {
+    position: fixed; /* Фіксоване розташування над усім */
+    top: 20px; /* Відступ зверху */
+    left: 50%; /* Центрування по горизонталі */
+    transform: translateX(-50%); /* Вирівнювання по центру */
+    z-index: 1100; /* Більший за z-index інших елементів */
+    background-color: #721c24; /* Червоний фон для помилки (можна змінити) */
+    color: white;
+    padding: 10px 20px;
+    border: 1px solid #721c24;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+}
+.flash-message.success {
+    background-color: #155724; /* Зелений фон */
+    color: white;
+    border-color: #155724;
+}
+.flash-message.warning {
+    background-color: #7e7c02; /* Зелений фон */
+    color: white;
+    border-color: #574815;
+}
+.flash-message.error {
+    background-color: #721c24; /* Червоний фон */
+    color: white;
+    border-color: #721c24;
+}
+.flash-message.info {
+    background-color: #0c5460; /* Синій фон */
+    color: white;
+    border-color: #0c5460;
+}
+
+.account-boredr1 {
+    margin-bottom: 5px;
+    border: none;
+    border-bottom: solid 2px;
+}
+.account-boredr2 {
+    margin-top: 5px;
+    border: none;
+    border-top: solid 2px;
+}
+.btn_list:hover {
+    text-decoration: none;
+}
+/* Спочатку приховані */
+/* Загальний стиль для форм */
+.chat-name-form, .chat-color-form {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+/* Основний контейнер */
+#edit_container, #create_chat_container, .account-container-edit {
+    display: none;
+    width: 40%;                  /* Зменшена ширина для візуальної акуратності */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 15px;         /* Збільшено округлення для сучасного вигляду */
+    padding: 20px;               /* Простір усередині контейнера */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Додаємо тінь для глибини */
+    z-index: 5002;
+    animation: fadeIn 0.3s ease-in-out; /* Плавна анімація появи */
+}
+/* Анімація плавного з'явлення */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+/* Анімація overlay */
+@keyframes overlayFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+/* Кнопка закриття */
+#cancelButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;             /* Збільшено розмір для зручності */
+    cursor: pointer;
+    color: #888;                 /* Світлий колір тексту */
+    transition: color 0.2s ease-in-out; /* Ефект при наведенні */
+}
+#cancelButton:hover {
+    color: #000;                 /* Зміна кольору при наведенні */
+}
+.chat-color {
+    width: 40px;            /* Збільшуємо ширину */
+    height: 40px;           /* Збільшуємо висоту */
+    border: none;           /* Прибираємо рамку */
+    padding: 0;
+    /* Додатково, щоб прибрати стандартний вигляд, який може впливати */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+/* Для Chrome та інших Webkit-браузерів */
+.chat-color::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.chat-color::-webkit-color-swatch {
+    border: none;
+}
+/* Поле для введення */
+.NameForChad, .chat-color {
+    width: 100%;                 /* Поля займають всю ширину контейнера */
+    padding: 10px !important;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;      /* Врахування padding у загальну ширину */
+}
+/* Кнопка створення чату */
+.btn-name-create {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 15px;
+    text-align: center;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); /* Легкий ефект тіні */
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+}
+.btn-name-create:hover {
+    transform: scale(1.05);      /* Легке збільшення при наведенні */
+}
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 5001;
+}
+
+.send_container {
+    position: fixed;
+    bottom: 0;
+    right: 10px;
+    width: 73%;
+    min-height: 60px;         /* Мінімальна висота */
+    padding: 10px;
+    display: flex;
+    align-items: flex-end;    /* Вирівнювання елементів по нижньому краю */
+    gap: 10px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+/* Textarea, що автоматично розширюється */
+.send_input {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;    /* Враховує padding та border */
+    min-height: 35px;          /* Початкова висота */
+    max-height: 120px;         /* Максимальна висота (≈ 5 рядків) */
+    line-height: 1.5;          /* Можна налаштувати відповідно до вашого шрифту */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    resize: none;              /* Забороняємо користувачу змінювати розмір вручну */
+    overflow-y: hidden;        /* Спочатку приховуємо вертикальний скрол */
+}
+/* Кнопка відправлення */
+.send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    text-decoration: none;
+}
+.send-btn svg {
+    display: block; /* Забезпечує коректне відображення SVG */
+}
+
+.from-who {
+    display: block !important;
+    margin: 4px;
+}
+.created_chad_container {
+    display: inline-block;
+    height: 75px;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+.created_chad_top {
+    display: flex;
+    justify-content: space-between;
+}
+.created_chad_bottom {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    border: none;
+    border-top: solid;
+    border-width: 2px;
+}
+.created_chad_color {
+    width: 40px;
+    height: 10px;
+    margin-top: 10px;
+    border-radius: 3px;
+}
+.created_chad_textos {
+    text-decoration: none !important;
+}
+.created_chad_name {
+    display: inline;
+}
+.created_chad_some {
+    display: inline;
+    margin-top: 15px;
+    font-size: 10px;
+    color: gray !important;
+}
+
+/* Загальний стиль для повідомлень */
+.messages {
+    display: flex;
+    margin-top: 10px; /* Відступ між повідомленнями */
+    width: 100%; /* Робимо блок на всю ширину */
+}
+/* Стиль для повідомлень користувача */
+.user-send-container {
+    justify-content: flex-end; /* Вирівнюємо праворуч */
+    display: flex;
+}
+.user-send {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 75%; /* Обмежуємо ширину блоку */
+    text-align: left; /* Текст вирівнюється праворуч */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+/* Стиль для повідомлень ШІ */
+.ai-send-container {
+    justify-content: flex-start; /* Вирівнюємо ліворуч */
+    display: flex;
+}
+.ai-send {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 75%; /* Обмежуємо ширину блоку */
+    text-align: left; /* Текст вирівнюється ліворуч */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.chat_container {
+    height: 80%;
+    z-index: -100000 !important;
+}
+.btn-create-chat {
+    display: inline; /* Центрування елемента */
+    padding-left: 0.5px;
+    padding-bottom: 1px;
+    margin: 0;
+    justify-content: center; /* Вирівнювання горизонтально */
+    align-items: center; /* Вирівнювання вертикально */
+    background-color: transparent; /* Без фону кнопки */
+    cursor: pointer; /* Інтерактивний ефект курсора */
+    width: 25.5px;
+    border: 1.75px solid #fff; /* Рамка квадрата */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Легкий тіньовий ефект */
+}
+
+.container_1 {
+    position: fixed; /* Закріплює панель зліва */
+    left: 0;
+    width: 250px; /* Ширина бокової панелі */
+    height: 90vh; /* Займає всю висоту вікна */
+    padding: 15px; /* Внутрішній відступ для вмісту */
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1); /* Легкий тіньовий ефект */
+}
+.container_2 {
+    padding: 10px; /* Відступи для основного контенту */
+    position: fixed; /* Закріплює панель зліва */
+    right: 0;
+    width: 75%; /* Ширина бокової панелі */
+    height: 100%; /* Займає всю висоту вікна */
+    z-index: -1000;
+}
+.container_3 {
+    margin-top: 75px; /* Відступ зверху */
+    margin-right: 50px;
+    margin-bottom: 50px;
+    margin-left: 50px; /* Для інших сторін */
+    padding: 20px;
+    border-radius: 20px;
+    border: solid;
+    border-width: 4px;
+    border-color: black;
+    height: calc(60vh); /* Динамічна висота */
+    display: flex;
+    justify-content: space-between;
+}
+.container_4 {
+    padding: 40px;
+    border-radius: 20px;
+    width: 100%;
+    height: calc(30h); /* Динамічна висота */
+    display: flex;
+    justify-content: space-between;
+}
+.container_4-2 {
+    position: absolute; /* Встановлює елемент за межами нормального потоку */
+    top: 30%; /* Центрування по вертикалі */
+    left: 30%; /* Центрування по горизонталі */
+    transform: translate (-30%, -30%); /* Зміщує елемент назад на половину його ширини та висоти */
+}
+.container_5 {
+    padding: 40px;
+    border: solid;
+    border-width: 4px;
+    border-radius: 20px;
+    width: 100%;
+    height: calc(50vh); /* Динамічна висота */
+}
+.container_5-2 {
+    text-align: center;
+    margin-top: 20px;
+    border-top: solid;
+}
+.text_1 {
+    display: flex;
+    padding-bottom: 10px;
+    border-bottom: solid;
+    justify-content: space-between;
+}
+.text_1>a {
+    margin: 0;
+    margin-left: 2px;
+    align-items:left;
+}
+.text_3 {
+    display: flex;
+    padding-top: 10px !important;
+    border-top: solid;
+    justify-content: space-between;
+    bottom: 0;
+}
+.text_3-3 {
+    text-align: right;
+}
+.text_4-1 {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    border-right: solid;
+}
+.text_4-2 {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    justify-content: center;
+}
+.text_p_sing {
+    text-align: left;
+}
+
+.form-control {
+    width: 75%;
+}
+
+.btn {
+    margin-top: 10px;
+}
+/* .btn_center {
+    display: flex;
+    justify-content: center;
+} */
+
+.burger {margin-left: 0.5rem!important;}
+.drop3, .drop4 {
+    position: relative;
+    display: inline-block;
+}
+.drop2 {margin: auto;}
+.baton1, .baton2, .baton3, .baton4 {z-index: 1000;}
+.baton3 {
+    display: none; /* Ховаємо меню за замовчуванням */
+    position: absolute;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: black;
+    padding: 10px;
+    margin-top: 0.01rem;
+    right: -0.5rem!important;
+}
+.baton4 {
+    display: none; /* Ховаємо меню за замовчуванням */
+    position: absolute;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: black;
+    padding: 10px;
+    margin-top: 0.01rem;
+    right: 0.1rem!important;
+}
+.baton3 a {
+    text-decoration: none;
+    padding: 5px 10px;
+    display: block;
+}
+.baton3 a:hover {
+    text-decoration: underline;
+}
+.drop3:hover .baton3 {
+    display: block;
+}
+.baton4 a:hover {
+    text-decoration: underline;
+}
+.drop4:hover .baton4 {
+    display: block;
+}
+.baton4 a {
+    text-decoration: none;
+    padding: 5px 10px;
+    display: block;
+}
+.baton1 {
+    display: none;
+}
+/*Account*/
+@media (max-width:800px) {
+    .profile-info {
+        text-align: center !important;
+    }
+    .home_btn, .acount_btn, .drop4 {
+        display: none;
+    }
+    .baton1 {
+        display: block;
+    }
+    .container_2 {width: 56.5%;}
+    .send_container {
+        width: 53%;
+    }
+    .send_input {
+        width: 85%;
+    }
+}
+.navbar_1 {
+    height: 4rem;
+    padding: 8px;
+    display: flex; /* Встановлюємо flex-контейнер */
+    gap: 15px;
+    align-items: center; /* Вирівнюємо елементи по вертикалі */
+    justify-content: space-between; /* Розділяємо заголовок і кнопки */
+}
+/*.navbar_1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rem;
+    padding: 8px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+}
+*/
+.navbar_2 {
+    display: flex; /* Встановлюємо flex-контейнер */
+    justify-content: flex-end; /* Вирівнюємо кнопки вправо */
+}
+
+/* Стилізація скролбара */
+::-webkit-scrollbar {
+    width: 8px; /* Ширина вертикального скролбара */
+}
+.scrollable-container1 {
+    height: calc(100vh - 220px); /* Віднімаємо 150px (підлаштуйте під ваш макет) */
+    padding-right: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    overflow-y: auto;
+}
+.scrollable-container2 {
+    height: 240px; /* Висота контейнера */
+    width: 98%;
+    margin-bottom: 20px;
+    padding-right: 10px;
+    overflow-y: auto; /* Додає вертикальний скролбар */
+}
+.scrollable-container3 {
+    height: calc(100vh - 180px);
+    max-height: 90vh; /* Максимальна висота контейнера */
+    min-height: calc(100vh - 90vh); /* Мінімальна висота контейнера */
+    padding-right: 20px;
+    margin-top: 20px;
+    overflow-y: auto; /* Додає вертикальний скролбар */
+}
+/* Верхня тінь 
+.chat_container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px; 
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+}
+/* Нижня тінь 
+.chat_container::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+    z-index: -10000;
+}*/
+/* Фон області прокручування */
+.scrollable-container1::-webkit-scrollbar, .scrollable-container2::-webkit-scrollbar, .scrollable-container3::-webkit-scrollbar {
+    width: 5px; /* Ширина скролбара для браузерів з підтримкою WebKit */
+}
